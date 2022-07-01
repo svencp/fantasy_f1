@@ -6,6 +6,14 @@
 
 
 use termion::{color, style};
+use std::time::SystemTime;
+use std::env;
+
+
+pub const MY_NORMAL_GRAY: color::Rgb =  color::Rgb (177, 177, 177);
+pub const MY_YELLOW: color::Rgb =  color::Rgb (253, 185, 73);
+
+
 
 
 
@@ -16,6 +24,13 @@ pub enum Feedback{
     Error
 }
 
+
+#[allow(dead_code)]
+pub enum Justify {
+    Left,
+    Center,
+    Right
+}
 
 
 // A function to give command line feedback to situations such as errors or warnings
@@ -39,10 +54,67 @@ pub fn make_10x_int(float: f32) -> i32 {
 
 }
 
+// Function to show response times
+pub fn show_response(now: SystemTime){
+    // let my_normal_gray = color::Rgb (177, 177, 177);
+    let duration = now.elapsed().unwrap().as_millis();
+    let message = format!("Program runtime is: {:?}ms", duration);
+    print!("{}{}{}", color::Fg(MY_NORMAL_GRAY), message, style::Reset); 
+}  
 
 
+/*
+    A function that returns a string with repeated char (although
+    in this function it is a string).
+*/
+pub fn repeat_char(ch: String, num: usize) -> String {
+    let mut ret = String::new();
+    for i in 0..num {
+        match i {
+            _ => { ret.push_str(&ch) }
+        }
+    }
+    ret
+}
 
 
+#[allow(dead_code)]
+// A function that justifies a phrase in a given number of characters
+pub fn justify(phrase: String, num: usize, which: Justify) -> String {
+    let ret: String = phrase.trim().to_string();
+    let p_len = ret.len() as usize;
+
+    if p_len >= num {
+        return ret
+    }
+
+    let spare = num - p_len;
+    let padding = repeat_char(" ".to_string(), spare);
+
+    match which {
+        Justify::Left   => { return format!("{}{}",ret, padding) }
+        Justify::Right  => { return format!("{}{}",padding, ret) }
+        Justify::Center => {
+                        if let 0 = spare % 2 {        // if spare is even
+                            let front_len = spare / 2;
+                            let front = repeat_char(" ".to_string(), front_len);
+                            let back = front.clone();
+                            return format!("{}{}{}", front, ret, back) 
+
+                        }                             // else spare is odd
+                        // let front_len = spare / 2;
+                        // let front = repeat_char(" ".to_string(), front_len);
+                        // let back_len = front_len + 1;
+                        // let back = repeat_char(" ".to_string(), back_len);
+                        // return format!("{}{}{}", front, ret, back) 
+                        let back_len = spare / 2 ;
+                        let back  = repeat_char(" ".to_string(), back_len);
+                        let front_len = back_len + 1;
+                        let front = repeat_char(" ".to_string(), front_len);
+                        return format!("{}{}{}", front, ret, back) 
+        }
+    }
+}
 
 
 

@@ -13,7 +13,7 @@ use std::io::*;
 use std::io::{self, BufRead};
 use std::path::Path;
 use std::result::Result;
-
+use termion::{color, style};
 
 
 #[allow(non_snake_case)]
@@ -180,11 +180,52 @@ impl Drivers {
         
         decoded.sort_by(|a, b| b.points.cmp(&a.points));
         Ok(decoded)
+
+    } // End of load_driver
+
+    
+    
+    
+    
+    
+    
+} // End of impl
+
+
+
+// Function to show driver table
+pub fn print_driver_table(table: &Vec<Drivers>){
+    const WDRIVER: usize = 12;
+    const WPOINTS: usize =  7;
+    const WPRICE: usize  =  7;
+
+    let t_driver = "Driver".to_string();
+    let t_points = "Points".to_string();
+    let t_price = "Price".to_string();
+
+    let tdr = justify(t_driver, WDRIVER, Justify::Left);
+    let tpo = justify(t_points, WPOINTS, Justify::Right);
+    let tpr = justify(t_price, WPRICE, Justify::Right);
+    
+    println!();
+    println!("{}{} {} {}{}",color::Fg(MY_YELLOW), tdr,tpr,tpo, style::Reset);
+    
+    for d in table{
+        let tdr = justify(d.name.clone(), WDRIVER, Justify::Left);
+        let tpr = justify(d.price.to_string(), WPOINTS, Justify::Right);
+        let tpo = justify(d.points.to_string(), WPRICE, Justify::Right);
+        
+        println!("{} {} {}",tdr,tpr,tpo);
     }
+
+
+
+
+
+
+
+
 }
-
-
-
 
 
 
