@@ -17,10 +17,11 @@ use library::solutions::*;
 use std::env;
 use std::process::exit;
 use std::time::SystemTime;
-
+use termion::{color, style};
 use crate::library::solutions::Solutions;
 use crate::library::teams::*;
-// use crate::library::teams::Teams;
+
+
 
 pub const DRIVER_POINTS_FILENAME: &str = "./driver-points.txt";
 pub const DRIVER_PRICE_FILENAME: &str = "./driver-price.txt";
@@ -104,20 +105,20 @@ fn main() {
     let driver_combi: Vec<_> = Combinations::new(driver.clone(), r).collect();
 
 
-    // // Try one team first
-    // let team1 = &teams[0];
-
     for t in teams {
 
         for c in driver_combi.clone() {
-            let solution = calculate_solution(c, t.clone(), budget);
-            // sol_vec.push(solution);
-            if solution.is_valid {
-                sol_vec.push(solution.clone());
-            }
-    
-            if solution.total_points > temp_sol.total_points.clone() && solution.is_valid {
-                temp_sol = solution.clone();
+            let sol_td: Vec<Solutions> = calculate_solutions(c, t.clone(), budget, turbo_price_cutoff);
+
+            for solution in sol_td {
+
+                if solution.is_valid {
+                    sol_vec.push(solution.clone());
+                }
+        
+                if solution.total_points > temp_sol.total_points.clone() && solution.is_valid {
+                    temp_sol = solution.clone();
+                }
             }
         }
     }
@@ -128,24 +129,34 @@ fn main() {
     sol_vec.reverse();
 
 
-    // // find index
-    // let mut index = 0;
-    // for f in sol_vec.clone() {
-    //     if f.total_points == temp_sol.total_points {
-    //         break;
-    //     }
+    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Show Results &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    //     index += 1;
-    // }
+    println!("");
+
+    for i in 0..20 {
+        let mut color = MY_WHITE;
+        if i % 2 == 1 {
+            color = MY_WHITER;
+        }
+
+        let line = format!("{} {} {} {} {} {}",  sol_vec[i].drivers[0],
+                                                        sol_vec[i].drivers[1],
+                                                        sol_vec[i].drivers[2],
+                                                        sol_vec[i].drivers[3],
+                                                        sol_vec[i].drivers[4],
+                                                        sol_vec[i].car);
+        let just = justify(line, 50, Justify::Left);
+        let arr = justify(" --> ".to_string(), 6, Justify::Left);
+        let turbo = justify(sol_vec[i].turbo_driver.to_string(), 12, Justify::Right);
+        let tpr = justify(sol_vec[i].total_price.to_string(), 7, Justify::Right);
+        let tpo = justify(sol_vec[i].total_points.to_string(), 7, Justify::Right);
+        println!("{}{}{}{}{}{}{}",color::Fg(color),just,arr,turbo,tpr,tpo,style::Reset);
+    }
 
 
-    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-    // println!("Index of optimal solution is {}",index);
-    println!("The higest points were found to be {} with a price of {}",temp_sol.total_points, temp_sol.total_price);
-    println!("Hello, Svenny!!");
+    println!();
+    println!("The highest points were found to be {} with a price of {}",temp_sol.total_points, temp_sol.total_price);
     show_response(now);
-
 
 
 } // End of Main

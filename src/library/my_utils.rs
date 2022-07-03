@@ -11,7 +11,9 @@ use std::env;
 
 
 pub const MY_NORMAL_GRAY: color::Rgb =  color::Rgb (177, 177, 177);
-pub const MY_YELLOW: color::Rgb =  color::Rgb (253, 185, 73);
+pub const MY_YELLOW: color::Rgb      =  color::Rgb (253, 185, 73);
+pub const MY_WHITE: color::Rgb       =  color::Rgb (230, 230, 230);
+pub const MY_WHITER: color::Rgb      =  color::Rgb (160, 160, 160);
 
 
 

@@ -20,7 +20,7 @@ pub struct Solutions {
     pub total_points: i32,
     pub total_price: i32,
     pub drivers: Vec<String>,
-    pub team: String,
+    pub car: String,
     pub turbo_driver: String,
     pub is_valid: bool,
 }
@@ -35,7 +35,7 @@ impl Solutions {
             total_price: 0,
             drivers: Vec::with_capacity(5),
             turbo_driver: "".to_string(),
-            team: "".to_string(),
+            car: "".to_string(),
             is_valid: false,
         }
     }
@@ -51,22 +51,66 @@ impl Solutions {
 
 
 // calcualet the totals and if it is a solution
-pub fn calculate_solution(vec: Vec<Drivers>, car: Teams, budget: i32) -> Solutions {
-    let mut ret = Solutions::new();
+pub fn calculate_solutions(vec: Vec<Drivers>, car: Teams, budget: i32, tdc: i32) -> Vec<Solutions> {
+    // let mut ret = Solutions::new();
 
-    for d in vec {
-        ret.total_points += d.points;
-        ret.total_price += d.price;
-        ret.drivers.push(d.name);
+    let mut ret: Vec<Solutions> = Vec::new();
+    let mut total_points = 0;
+    let mut total_price = 0;
+    let mut driver_vec: Vec<String> = Vec::new();
+
+
+    // Lets get some totals which would be the same for all non turbo drivers
+    for d in vec.clone() {
+        total_points+= d.points;
+        total_price += d.price;
+        
+        driver_vec.push(d.name);
     }
 
-    ret.total_points += car.points;
-    ret.total_price += car.price;
-    ret.team = car.team.clone();
+    
+    total_points += car.points; 
+    total_price += car.price; 
 
-    if ret.total_price <= budget {
-        ret.is_valid = true;
+    
+    // Loop through drivers and fill all fields
+    for i in 0..vec.len() {
+        let mut any_sol: Solutions = Solutions::new();
+
+        any_sol.turbo_driver = vec[i].name.to_string();
+        any_sol.total_points = total_points + vec[i].points;
+        any_sol.drivers = driver_vec.clone();
+        any_sol.car = car.team.clone();
+        any_sol.total_price = total_price;
+
+        // Both budget and turbo price cutoof must comply
+        if vec[i].price <= tdc && any_sol.total_price <= budget {
+            any_sol.is_valid = true;
+        }
+
+        ret.push(any_sol);
+
     }
+
+
+
+
+
+
+
+    // for d in vec {
+    //     ret.total_points += d.points;
+    //     ret.total_price += d.price;
+    //     ret.drivers.push(d.name);
+    // }
+
+    // ret.total_points += car.points;
+    // ret.total_price += car.price;
+    // ret.team = car.team.clone();
+
+    // if ret.total_price <= budget {
+    //     ret.is_valid = true;
+    // }
 
     return ret;
 } // End of calculate_solution
