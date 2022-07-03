@@ -97,28 +97,52 @@ fn main() {
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& combinatorics &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     let mut sol_vec: Vec<Solutions> = Vec::new();
+    let mut temp_sol: Solutions = Solutions::new();
 
     // r = the number of drivers allowed in fantasy
     let r = 5;
     let driver_combi: Vec<_> = Combinations::new(driver.clone(), r).collect();
 
-    // Try one team first
-    let team1 = &teams[0];
 
-    for c in driver_combi {
-        let solution = calculate_solution(c, team1, budget);
-        // sol_vec.push(solution);
-        if solution.is_valid {
-            sol_vec.push(solution);
+    // // Try one team first
+    // let team1 = &teams[0];
+
+    for t in teams {
+
+        for c in driver_combi.clone() {
+            let solution = calculate_solution(c, t.clone(), budget);
+            // sol_vec.push(solution);
+            if solution.is_valid {
+                sol_vec.push(solution.clone());
+            }
+    
+            if solution.total_points > temp_sol.total_points.clone() && solution.is_valid {
+                temp_sol = solution.clone();
+            }
         }
     }
 
+
+    // The optimal solutions are now in fronmt of the vector
+    sol_vec.sort();
     sol_vec.reverse();
-    // sol_vec.sort();
+
+
+    // // find index
+    // let mut index = 0;
+    // for f in sol_vec.clone() {
+    //     if f.total_points == temp_sol.total_points {
+    //         break;
+    //     }
+
+    //     index += 1;
+    // }
+
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    println!();
+    // println!("Index of optimal solution is {}",index);
+    println!("The higest points were found to be {} with a price of {}",temp_sol.total_points, temp_sol.total_price);
     println!("Hello, Svenny!!");
     show_response(now);
 

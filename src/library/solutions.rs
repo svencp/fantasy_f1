@@ -10,6 +10,8 @@
 
 use crate::library::teams::*;
 use crate::library::drivers::*;
+use std::collections::BTreeSet;
+
 
 
 #[allow(non_snake_case)]
@@ -31,10 +33,10 @@ impl Solutions {
         Solutions {
             total_points: 0,
             total_price: 0,
-            is_valid: false,
-            drivers: Vec::new(),
-            team: "".to_string(),
+            drivers: Vec::with_capacity(5),
             turbo_driver: "".to_string(),
+            team: "".to_string(),
+            is_valid: false,
         }
     }
 
@@ -49,7 +51,7 @@ impl Solutions {
 
 
 // calcualet the totals and if it is a solution
-pub fn calculate_solution(vec: Vec<Drivers>, car: &Teams, budget: i32) -> Solutions {
+pub fn calculate_solution(vec: Vec<Drivers>, car: Teams, budget: i32) -> Solutions {
     let mut ret = Solutions::new();
 
     for d in vec {
