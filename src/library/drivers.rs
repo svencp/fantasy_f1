@@ -217,14 +217,6 @@ pub fn print_driver_table(table: &Vec<Drivers>){
         
         println!("{} {} {}",tdr,tpr,tpo);
     }
-
-
-
-
-
-
-
-
 }
 
 

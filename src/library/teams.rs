@@ -13,6 +13,7 @@ use std::io::*;
 use std::io::{self, BufRead};
 use std::path::Path;
 use std::result::Result;
+use termion::{color, style};
 
 
 #[allow(non_snake_case)]
@@ -177,6 +178,31 @@ impl Teams {
 
 
 
+// Function to show team table
+pub fn print_team_table(table: &Vec<Teams>){
+    const WTEAM: usize = 12;
+    const WPOINTS: usize =  7;
+    const WPRICE: usize  =  7;
+
+    let t_team = "Team".to_string();
+    let t_points = "Points".to_string();
+    let t_price = "Price".to_string();
+
+    let tdr = justify(t_team, WTEAM, Justify::Left);
+    let tpo = justify(t_points, WPOINTS, Justify::Right);
+    let tpr = justify(t_price, WPRICE, Justify::Right);
+    
+    println!();
+    println!("{}{} {} {}{}",color::Fg(MY_YELLOW), tdr,tpr,tpo, style::Reset);
+    
+    for d in table{
+        let ttr = justify(d.team.clone(), WTEAM, Justify::Left);
+        let tpr = justify(d.price.to_string(), WPOINTS, Justify::Right);
+        let tpo = justify(d.points.to_string(), WPRICE, Justify::Right);
+        
+        println!("{} {} {}",ttr,tpr,tpo);
+    }
+} // End of print_team_table
 
 
 
