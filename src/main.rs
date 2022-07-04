@@ -32,7 +32,8 @@ fn main() {
     let now = SystemTime::now();
     let arguments: Vec<String> = env::args().collect();
     if arguments.len() < 3 {
-        let message = format!("Not enough arguments, please supply a tenfold budget and turbo price cut-off.");
+        let message = format!("Not enough arguments, please supply a tenfold budget first \n
+                                    then followed by the turbo price cut-off.");
         feedback(Feedback::Error, message);
         exit(17);
     }
@@ -41,7 +42,7 @@ fn main() {
     
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& arguments &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     // Get budget
-    let res_budget = arguments[1].parse::<i32>(); 
+    let res_budget = arguments[2].parse::<i32>(); 
     if res_budget.is_err() {
         let message = format!("Budget is not a valid number.");
         feedback(Feedback::Error, message);
@@ -51,7 +52,7 @@ fn main() {
     println!("The budget is {}",budget);
     
     // Get Turbo price cut-off (tpc)
-    let res_tpc = arguments[2].parse::<i32>(); 
+    let res_tpc = arguments[1].parse::<i32>(); 
     if res_tpc.is_err() {
         let message = format!("Turbo price cut-off is not a valid number.");
         feedback(Feedback::Error, message);
@@ -155,7 +156,8 @@ fn main() {
 
 
     println!();
-    println!("The highest points were found to be {} with a price of {}",temp_sol.total_points, temp_sol.total_price);
+    let f_price: f64 = temp_sol.total_price.to_string().parse::<f64>().unwrap() / 10.0;
+    println!("The budget was found to be ${} with the highest points of{}", f_price, temp_sol.total_points);
     show_response(now);
 
 

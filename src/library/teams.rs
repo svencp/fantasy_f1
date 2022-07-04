@@ -8,10 +8,8 @@
 
 use crate::library::my_utils::*;
 use std::fs::OpenOptions;
-use std::fs::*;
 use std::io::*;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::io::{BufRead};
 use std::result::Result;
 use termion::{color, style};
 
@@ -86,7 +84,7 @@ impl Teams {
                     s_team.team = line1.clone();
                     decoded.push(s_team);
                 }
-                _ => { //Should never get here, so nothing to do.
+                _ => {   //Should never get here, so nothing to do.
                 }
             }
 
@@ -95,7 +93,6 @@ impl Teams {
 
         // ====================================================== Prices =================================================
         // Now to get the prices inserted
-        // Lets open the Prices file file
         let file_tpr = match OpenOptions::new()
             .read(true)
             .write(false)
@@ -152,7 +149,7 @@ impl Teams {
                     let big = make_10x_int(first_float.clone());
                     decoded[index].price = big;
                 }
-                _ => { //Should never get here, so nothing to do.
+                _ => {   //Should never get here, so nothing to do.
                 }
             }
 
@@ -163,14 +160,6 @@ impl Teams {
         Ok(decoded)
 
     }// End of load_teams
-
-
-
-
-
-
-
-
 
 
 
@@ -202,6 +191,7 @@ pub fn print_team_table(table: &Vec<Teams>){
         
         println!("{} {} {}",ttr,tpr,tpo);
     }
+    
 } // End of print_team_table
 
 

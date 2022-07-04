@@ -8,10 +8,8 @@
 
 use crate::library::my_utils::*;
 use std::fs::OpenOptions;
-use std::fs::*;
 use std::io::*;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::io::{BufRead};
 use std::result::Result;
 use termion::{color, style};
 
@@ -97,7 +95,7 @@ impl Drivers {
                     s_driver.team = line2.clone();
                     decoded.push(s_driver);
                 }
-                _ => { //Should never get here, so nothing to do.
+                _ => {   //Should never get here, so nothing to do.
                 }
             }
 
@@ -106,7 +104,6 @@ impl Drivers {
 
         // ====================================================== Prices =================================================
         // Now to get the prices inserted
-        // Lets open the Prices file file
         let file_dpr = match OpenOptions::new()
             .read(true)
             .write(false)
@@ -171,7 +168,7 @@ impl Drivers {
                     let big = make_10x_int(first_float.clone());
                     decoded[index].price = big;
                 }
-                _ => { //Should never get here, so nothing to do.
+                _ => {   //Should never get here, so nothing to do.
                 }
             }
 
@@ -181,11 +178,9 @@ impl Drivers {
         decoded.sort_by(|a, b| b.points.cmp(&a.points));
         Ok(decoded)
 
+
     } // End of load_driver
 
-    
-    
-    
     
     
     
@@ -218,9 +213,6 @@ pub fn print_driver_table(table: &Vec<Drivers>){
         println!("{} {} {}",tdr,tpr,tpo);
     }
 }
-
-
-
 
 
 

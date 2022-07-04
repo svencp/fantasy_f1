@@ -10,7 +10,6 @@
 
 use crate::library::teams::*;
 use crate::library::drivers::*;
-use std::collections::BTreeSet;
 
 
 
@@ -40,10 +39,6 @@ impl Solutions {
         }
     }
 
-
-    
-    
-    
     
 }// End of impl Solutions
 
@@ -52,7 +47,6 @@ impl Solutions {
 
 // calcualet the totals and if it is a solution
 pub fn calculate_solutions(vec: Vec<Drivers>, car: Teams, budget: i32, tdc: i32) -> Vec<Solutions> {
-    // let mut ret = Solutions::new();
 
     let mut ret: Vec<Solutions> = Vec::new();
     let mut total_points = 0;
@@ -91,26 +85,6 @@ pub fn calculate_solutions(vec: Vec<Drivers>, car: Teams, budget: i32, tdc: i32)
         ret.push(any_sol);
 
     }
-
-
-
-
-
-
-
-    // for d in vec {
-    //     ret.total_points += d.points;
-    //     ret.total_price += d.price;
-    //     ret.drivers.push(d.name);
-    // }
-
-    // ret.total_points += car.points;
-    // ret.total_price += car.price;
-    // ret.team = car.team.clone();
-
-    // if ret.total_price <= budget {
-    //     ret.is_valid = true;
-    // }
 
     return ret;
 } // End of calculate_solution

@@ -7,7 +7,6 @@
 
 use termion::{color, style};
 use std::time::SystemTime;
-use std::env;
 
 
 pub const MY_NORMAL_GRAY: color::Rgb =  color::Rgb (177, 177, 177);
@@ -104,11 +103,6 @@ pub fn justify(phrase: String, num: usize, which: Justify) -> String {
                             return format!("{}{}{}", front, ret, back) 
 
                         }                             // else spare is odd
-                        // let front_len = spare / 2;
-                        // let front = repeat_char(" ".to_string(), front_len);
-                        // let back_len = front_len + 1;
-                        // let back = repeat_char(" ".to_string(), back_len);
-                        // return format!("{}{}{}", front, ret, back) 
                         let back_len = spare / 2 ;
                         let back  = repeat_char(" ".to_string(), back_len);
                         let front_len = back_len + 1;
@@ -117,8 +111,6 @@ pub fn justify(phrase: String, num: usize, which: Justify) -> String {
         }
     }
 }
-
-
 
 
 
@@ -154,16 +146,4 @@ mod tests {                   //     DONT RUN THE TESTS ABOVE THIS LINE
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-}
+}  // End of tests
