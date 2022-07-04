@@ -5,7 +5,10 @@ up to that point in time.
 Because of the inaccuracy of floating point numbers, I have decided to make all numbers to be integers.
 This I feel will make the LP problem more accurite.
 
-    2022-06-27    Sven Ponelat
+    2022-06-27      Sven Ponelat
+
+    2022-07-04      Added Titles to final table
+                    Remember to make final execute do: cargo build --release
 */
 
 mod library;
@@ -32,8 +35,9 @@ fn main() {
     let now = SystemTime::now();
     let arguments: Vec<String> = env::args().collect();
     if arguments.len() < 3 {
-        let message = format!("Not enough arguments, please supply a tenfold budget first \n
-                                    then followed by the turbo price cut-off.");
+        let message = format!("Not enough arguments, please supply a tenfold turbo price cut-off first \
+                                    and then followed by a tenfold budget. \n \
+                                    (eg.) /home/dave/f1_fantasy/fantasy_f1 200 990");
         feedback(Feedback::Error, message);
         exit(17);
     }
@@ -133,6 +137,8 @@ fn main() {
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Show Results &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     println!("");
+    println!("{}{}                                                    {}        {}   {}{}",
+        color::Fg(MY_YELLOW), "Drivers and car","TD","$","Points", style::Reset);
 
     for i in 0..20 {
         let mut color = MY_WHITE;
@@ -146,7 +152,7 @@ fn main() {
                                                         sol_vec[i].drivers[3],
                                                         sol_vec[i].drivers[4],
                                                         sol_vec[i].car);
-        let just = justify(line, 50, Justify::Left);
+        let just = justify(line, 54, Justify::Left);
         let arr = justify(" --> ".to_string(), 6, Justify::Left);
         let turbo = justify(sol_vec[i].turbo_driver.to_string(), 12, Justify::Right);
         let tpr = justify(sol_vec[i].total_price.to_string(), 7, Justify::Right);
@@ -157,7 +163,7 @@ fn main() {
 
     println!();
     let f_price: f64 = temp_sol.total_price.to_string().parse::<f64>().unwrap() / 10.0;
-    println!("The budget was found to be ${} with the highest points of{}", f_price, temp_sol.total_points);
+    println!("The budget was found to be ${} with the highest points of {}", f_price, temp_sol.total_points);
     show_response(now);
 
 
