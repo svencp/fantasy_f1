@@ -9,6 +9,9 @@ This I feel will make the LP problem more accurite.
 
     2022-07-04      Added Titles to final table
                     Remember to make final execute do: cargo build --release
+
+    2022-07-06      Making the calculations multithreaded
+    
 */
 
 mod library;
