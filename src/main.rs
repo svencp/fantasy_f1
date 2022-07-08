@@ -142,6 +142,7 @@ fn main() {
     // r = the number of drivers allowed in fantasy
     let r = 5;
     let driver_combinations: Vec<_> = Combinations::new(driver.clone(), r).collect();
+    // The arc here might not be necessary
     let arc_driver_combinations = Arc::new(driver_combinations.clone());
     
     
@@ -150,14 +151,11 @@ fn main() {
     let mut children = Vec::new();
 
 
-
-
-
     for car in teams.clone() {
 
         // The sender endpoint can be copied
         let thread_tx = tx.clone();
-        let car_name = car.clone().team;
+        // let car_name = car.clone().team;
         let combinations = arc_driver_combinations.clone();
 
 
@@ -180,14 +178,13 @@ fn main() {
             }
             
             
-            
             // The thread takes ownership over `thread_tx`
             // Each thread queues a message in the channel
             thread_tx.send(thread_solutions).unwrap();
             
             // Sending is a non-blocking operation, the thread will continue
             // immediately after sending its message
-            println!("thread {} finished", car_name);
+            // println!("thread {} finished", car_name);
         });
         
         children.push(child);
