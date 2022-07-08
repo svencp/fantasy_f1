@@ -12,6 +12,9 @@ This I feel will make the LP problem more accurite.
 
     2022-07-06      Making the calculations multithreaded
     
+    2022-07-08      Adding version to arguments
+
+    
 */
 
 mod library;
@@ -38,32 +41,40 @@ pub const DRIVER_PRICE_FILENAME: &str = "./driver-price.txt";
 pub const TEAM_POINTS_FILENAME: &str = "./team-points.txt";
 pub const TEAM_PRICE_FILENAME: &str = "./team-price.txt";
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+
+
 fn main() {
     let now = SystemTime::now();
     let arguments: Vec<String> = env::args().collect();
+    // let mut command = None;
 
     match arguments.len() {
         2 => {
-            command = Some(arguments[1].to_lowercase().trim().to_owned());
-        },
-        3 => {
-            command = Some(arguments[1].to_lowercase().trim().to_owned());
-            sub1 = Some(arguments[2].trim().to_owned());
+            let command = Some(arguments[1].to_lowercase().trim().to_owned());
+            match command.unwrap().as_str() {
+                "v"|"V"|"-v"|"-V"|"version"|"Version"|"VERSION"|"-version"|"-Version"|"-VERSION" => {
+                    let message = format!("My Fantasy F1 version:  {}", VERSION);
+                    feedback(Feedback::Info, message);
+                    exit(17);
+
+                }
+
+                    // Not a valid first argument 
+                _   => {
+                    let message = format!("Not enough arguments, please supply a tenfold turbo price cut-off first \
+                                            and then followed by a tenfold budget. \n \
+                                            (eg.) /home/dave/f1_fantasy/fantasy_f1 200 990");
+                    feedback(Feedback::Error, message);
+                    exit(17);
+                } //end of _ 
+            }
         },
 
         _ => { () }
     }
 
-
-
-
-    if arguments.len() < 3 {
-        let message = format!("Not enough arguments, please supply a tenfold turbo price cut-off first \
-                                    and then followed by a tenfold budget. \n \
-                                    (eg.) /home/dave/f1_fantasy/fantasy_f1 200 990");
-        feedback(Feedback::Error, message);
-        exit(17);
-    }
     println!();
     
     
