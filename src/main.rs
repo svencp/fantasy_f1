@@ -24,6 +24,10 @@ use std::env;
 use std::process::exit;
 use std::time::SystemTime;
 use termion::{color, style};
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
+use std::sync::{Arc};
 use crate::library::solutions::Solutions;
 use crate::library::teams::*;
 
@@ -37,6 +41,22 @@ pub const TEAM_PRICE_FILENAME: &str = "./team-price.txt";
 fn main() {
     let now = SystemTime::now();
     let arguments: Vec<String> = env::args().collect();
+
+    match arguments.len() {
+        2 => {
+            command = Some(arguments[1].to_lowercase().trim().to_owned());
+        },
+        3 => {
+            command = Some(arguments[1].to_lowercase().trim().to_owned());
+            sub1 = Some(arguments[2].trim().to_owned());
+        },
+
+        _ => { () }
+    }
+
+
+
+
     if arguments.len() < 3 {
         let message = format!("Not enough arguments, please supply a tenfold turbo price cut-off first \
                                     and then followed by a tenfold budget. \n \
@@ -104,37 +124,115 @@ fn main() {
     print_team_table(&teams);
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& combinatorics &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-    let mut sol_vec: Vec<Solutions> = Vec::new();
+    
+    let mut vec_solutions: Vec<Solutions> = Vec::new();
     let mut temp_sol: Solutions = Solutions::new();
-
+    
     // r = the number of drivers allowed in fantasy
     let r = 5;
-    let driver_combi: Vec<_> = Combinations::new(driver.clone(), r).collect();
+    let driver_combinations: Vec<_> = Combinations::new(driver.clone(), r).collect();
+    let arc_driver_combinations = Arc::new(driver_combinations.clone());
+    
+    
+    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& threading &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    let (tx, rx): (Sender<Vec<Solutions>>, Receiver<Vec<Solutions>>) = mpsc::channel();
+    let mut children = Vec::new();
 
 
-    for t in teams {
 
-        for c in driver_combi.clone() {
-            let sol_td: Vec<Solutions> = calculate_solutions(c, t.clone(), budget, turbo_price_cutoff);
 
-            for solution in sol_td {
 
-                if solution.is_valid {
-                    sol_vec.push(solution.clone());
-                }
-        
-                if solution.total_points > temp_sol.total_points.clone() && solution.is_valid {
-                    temp_sol = solution.clone();
+    for car in teams.clone() {
+
+        // The sender endpoint can be copied
+        let thread_tx = tx.clone();
+        let car_name = car.clone().team;
+        let combinations = arc_driver_combinations.clone();
+
+
+        // Each thread will send its id via the channel
+        let child = thread::spawn(move || {
+
+            let mut thread_solutions: Vec<Solutions> = Vec::new();
+
+            for drv in combinations.to_vec() {
+                let td_solution: Vec<Solutions> = calculate_solutions(drv, car.clone(), 
+                                                budget.clone(), turbo_price_cutoff.clone());
+    
+                for solution in td_solution {
+    
+                    if solution.is_valid {
+                        thread_solutions.push(solution.clone());
+                    }
+            
                 }
             }
+            
+            
+            
+            // The thread takes ownership over `thread_tx`
+            // Each thread queues a message in the channel
+            thread_tx.send(thread_solutions).unwrap();
+            
+            // Sending is a non-blocking operation, the thread will continue
+            // immediately after sending its message
+            println!("thread {} finished", car_name);
+        });
+        
+        children.push(child);
+        
+        
+    }
+    
+    // VERY IMPORTANT:
+    // Drop the last sender to stop `rx` waiting for message.
+    // The program will not complete if we comment this out.
+    // **All** `tx` needs to be dropped for `rx` to have `Err`.
+    drop(tx);
+    
+    
+    // Here, all the messages are collected
+    // let mut ids = Vec::with_capacity(teams.clone().len() as usize);
+    for _ in 0..teams.len()  {
+        // The `recv` method picks a message from the channel
+        // `recv` will block the current thread if there are no messages available
+        
+        // ids.push(rx.recv());
+        // instead of pushing, lets work it here
+        let th_sol = rx.recv();
+        if th_sol.is_err(){
+            let message = format!("A thread solution receiver panicked!");
+            feedback(Feedback::Error, message);
+            exit(17);
         }
+        
+        for sol in th_sol.unwrap(){
+            
+            // To check for the highest points
+            if sol.total_points > temp_sol.total_points.clone() && sol.is_valid {
+                temp_sol = sol.clone();
+            }
+
+            vec_solutions.push(sol);
+        }
+        
     }
 
-
-    // The optimal solutions are now in fronmt of the vector
-    sol_vec.sort();
-    sol_vec.reverse();
+    
+    // Wait for the threads to complete any remaining work
+    for child in children {
+        child.join().expect("oops! the child thread panicked");
+    }
+    
+    
+    
+    
+    
+    
+    
+    // The optimal solutions are now in from of the vector
+    vec_solutions.sort();
+    vec_solutions.reverse();
 
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Show Results &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -149,17 +247,17 @@ fn main() {
             color = MY_WHITER;
         }
 
-        let line = format!("{} {} {} {} {} {}",  sol_vec[i].drivers[0],
-                                                        sol_vec[i].drivers[1],
-                                                        sol_vec[i].drivers[2],
-                                                        sol_vec[i].drivers[3],
-                                                        sol_vec[i].drivers[4],
-                                                        sol_vec[i].car);
+        let line = format!("{} {} {} {} {} {}",  vec_solutions[i].drivers[0],
+                                                        vec_solutions[i].drivers[1],
+                                                        vec_solutions[i].drivers[2],
+                                                        vec_solutions[i].drivers[3],
+                                                        vec_solutions[i].drivers[4],
+                                                        vec_solutions[i].car);
         let just = justify(line, 54, Justify::Left);
         let arr = justify(" --> ".to_string(), 6, Justify::Left);
-        let turbo = justify(sol_vec[i].turbo_driver.to_string(), 12, Justify::Right);
-        let tpr = justify(sol_vec[i].total_price.to_string(), 7, Justify::Right);
-        let tpo = justify(sol_vec[i].total_points.to_string(), 7, Justify::Right);
+        let turbo = justify(vec_solutions[i].turbo_driver.to_string(), 12, Justify::Right);
+        let tpr = justify(vec_solutions[i].total_price.to_string(), 7, Justify::Right);
+        let tpo = justify(vec_solutions[i].total_points.to_string(), 7, Justify::Right);
         println!("{}{}{}{}{}{}{}",color::Fg(color),just,arr,turbo,tpr,tpo,style::Reset);
     }
 
