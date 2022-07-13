@@ -41,7 +41,8 @@ pub const DRIVER_PRICE_FILENAME: &str = "./driver-price.txt";
 pub const TEAM_POINTS_FILENAME: &str = "./team-points.txt";
 pub const TEAM_PRICE_FILENAME: &str = "./team-price.txt";
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
+const VERSION: &str            = env!("CARGO_PKG_VERSION");
+const TURBO_DRIVER_CUTOFF: i32 = 200;
 
 
 
@@ -89,16 +90,16 @@ fn main() {
     let budget = res_budget.unwrap();
     println!("The budget is {}",budget);
     
-    // Get Turbo price cut-off (tpc)
-    let res_tpc = arguments[1].parse::<i32>(); 
-    if res_tpc.is_err() {
-        let message = format!("Turbo price cut-off is not a valid number.");
-        feedback(Feedback::Error, message);
-        exit(17);
-    }
-    let turbo_price_cutoff = res_tpc.unwrap();
-    println!("The turbo price cutoff is {}",turbo_price_cutoff);
-    println!();
+    // // Get Turbo price cut-off (tpc)
+    // let res_tpc = arguments[1].parse::<i32>(); 
+    // if res_tpc.is_err() {
+    //     let message = format!("Turbo price cut-off is not a valid number.");
+    //     feedback(Feedback::Error, message);
+    //     exit(17);
+    // }
+    // let turbo_price_cutoff = res_tpc.unwrap();
+    // println!("The turbo price cutoff is {}",turbo_price_cutoff);
+    // println!();
     
     
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& files &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -166,7 +167,8 @@ fn main() {
 
             for drv in combinations.to_vec() {
                 let td_solution: Vec<Solutions> = calculate_solutions(drv, car.clone(), 
-                                                budget.clone(), turbo_price_cutoff.clone());
+                                                // budget.clone(), turbo_price_cutoff.clone());
+                                                budget.clone(), TURBO_DRIVER_CUTOFF);
     
                 for solution in td_solution {
     
