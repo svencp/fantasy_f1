@@ -182,8 +182,6 @@ impl Drivers {
     } // End of load_driver
 
     
-    
-    
 } // End of impl
 
 
@@ -213,6 +211,56 @@ pub fn print_driver_table(table: &Vec<Drivers>){
         println!("{} {} {}",tdr,tpr,tpo);
     }
 }
+
+
+
+#[allow(non_snake_case)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct CompleteStandings {
+    pub points: i32,
+    pub name: String,
+    pub team: String,
+    pub price: i32,
+    pub races: Vec<i32>,
+}
+
+
+impl CompleteStandings {
+    // make an empty Drivers struct
+    pub fn new() -> CompleteStandings {
+        CompleteStandings {
+            name: "".to_string(),
+            team: "".to_string(),
+            price: 0,
+            points: 0,
+            races: vec![30; 0],
+        }
+    }
+
+
+
+
+
+} // end of impl CompleteStandings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -269,4 +317,36 @@ mod tests {
 
         assert_eq!(yebo, true);
     }
+
+    // #[ignore]
+    #[test]
+    fn t004_load_complete1() {
+        let source1 = "./test/store/driver-points.txt";
+        let source2 = "./test/store/driver-price.txt";
+        let destination1 = "./test/dpo.txt";
+        let destination2 = "./test/dpr.txt";
+        copy(source1, destination1).expect("Failed to copy");
+        copy(source2, destination2).expect("Failed to copy");
+        let res = Drivers::load_driver(source1, source2);
+        remove_file(destination1).expect("Cleanup test failed");
+        remove_file(destination2).expect("Cleanup test failed");
+
+        let r1 = res.clone().unwrap();
+
+        assert_eq!(r1.len(), 20);
+
+        let mut yebo = true;
+        for i in res.unwrap() {
+            if i.price == 0 {
+                yebo = false;
+                break;
+            }
+        }
+
+        assert_eq!(yebo, true);
+    }
+
+
+
+
 }
