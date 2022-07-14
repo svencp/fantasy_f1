@@ -371,134 +371,82 @@ pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Ve
     }
 
 
+    // ====================================================== Prices =================================================
+    // Now to get the prices inserted
+    let file_dpr = match OpenOptions::new()
+        .read(true)
+        .write(false)
+        .create(false)
+        .open(d_price_file)
+    {
+        Ok(content) => content,
+        Err(_) => {
+            return Err("Problem opening driver prices file".to_string());
+        }
+    };
 
-    // for drv in decoded{
-    //     let mut revised = CompleteStandings::new();
-    //     let mut r_vec: Vec<i32> = Vec::new();
-    //     let points = drv.clone().races;
-    //     let iii = 3;
-    //     let aaa = points[iii];
+    let reader2 = BufReader::new(file_dpr);
+    counter = 1;
 
-    //     for i in 0..temp_len {
-    //         if i <= range_end {
-    //             let p = points[i];
-    //             // r_vec.push(drv.races[i]);
-    //         }
+    // Main Loop Pricing
+    for line in reader2.lines() {
+        if line.is_err() {
+            return Err("Something wrong with reader.lines()".to_string());
+        }
 
-    //     }
+        let in_string = line.unwrap();
 
-    //     // for race in drv.races {
-    //     //     if race <= range_end {
-    //     //         r_vec.push(race);
-    //     //     }
+        match counter % 3 {
+            1 => {
+                // we need to split the line and only get the surname
+                let temp = in_string.clone();
+                let dnames: Vec<_> = temp.split_whitespace().collect();
 
-    //     //     if race == i_end {
-    //     //         revised.points = race;
-    //     //     }
-    //     // }
+                for n in dnames {
+                    last_name = n.to_string();
+                }
 
-    //     // add revised driver
-    //     revised.name = drv.name;
-    //     revised.team = drv.team;
-    //     revised.races = r_vec;
-        
-    //     ret.push(revised);
+                // get the index of driver
+                index = 0;
+                for drv in ret.clone() {
+                    if drv.name == last_name {
+                        break;
+                    }
+                    index += 1;
+                }
+            }
+            2 => {
+                // Dont need the team name
+            }
+            0 => {
+                // Cleanup the string for parsing
+                let cc = in_string.clone();
+                let a1 = cc.replace("$", "");
+                let a2 = a1.replace("m", "");
+                let chunks: Vec<_> = a2.split_whitespace().collect();
+                for s in chunks {
+                    match s.parse::<f32>() {
+                        Ok(f) => {
+                            first_float = f;
+                            break;
+                        }
+                        Err(e) => return Err(e.to_string()),
+                    }
+                }
+                // insert the price into decoded
+                let big = make_10x_int(first_float.clone());
+                ret[index].price = big;
+            }
+            _ => {   //Should never get here, so nothing to do.
+            }
+        }
 
-    // }
-
-
-
-
-    // // Get rid of future races
-    // if min_zeros > 0 {
-    //     let temp_driver = &decoded[0];
-    //     let vec_len = temp_driver.races.len();
-        
-    //     println!("hello");
-    // }
-
-
-
-    // // ====================================================== Prices =================================================
-    // // Now to get the prices inserted
-    // let file_dpr = match OpenOptions::new()
-    //     .read(true)
-    //     .write(false)
-    //     .create(false)
-    //     .open(d_price_file)
-    // {
-    //     Ok(content) => content,
-    //     Err(_) => {
-    //         return Err("Problem opening driver prices file".to_string());
-    //     }
-    // };
-
-    // let reader2 = BufReader::new(file_dpr);
-    // counter = 1;
-
-    // // Main Loop Pricing
-    // for line in reader2.lines() {
-    //     if line.is_err() {
-    //         return Err("Something wrong with reader.lines()".to_string());
-    //     }
-
-    //     let in_string = line.unwrap();
-
-    //     match counter % 3 {
-    //         1 => {
-    //             // we need to split the line and only get the surname
-    //             let temp = in_string.clone();
-    //             let dnames: Vec<_> = temp.split_whitespace().collect();
-
-    //             for n in dnames {
-    //                 last_name = n.to_string();
-    //             }
-
-    //             // get the index of driver
-    //             index = 0;
-    //             for i in decoded.clone() {
-    //                 if i.name == last_name {
-    //                     break;
-    //                 }
-    //                 index += 1;
-    //             }
-    //         }
-    //         2 => {
-    //             // Dont need the team name
-    //         }
-    //         0 => {
-    //             // Cleanup the string for parsing
-    //             let cc = in_string.clone();
-    //             let a1 = cc.replace("$", "");
-    //             let a2 = a1.replace("m", "");
-    //             let chunks: Vec<_> = a2.split_whitespace().collect();
-    //             for s in chunks {
-    //                 match s.parse::<f32>() {
-    //                     Ok(f) => {
-    //                         first_float = f;
-    //                         break;
-    //                     }
-    //                     Err(e) => return Err(e.to_string()),
-    //                 }
-    //             }
-    //             // insert the price into decoded
-    //             let big = make_10x_int(first_float.clone());
-    //             decoded[index].price = big;
-    //         }
-    //         _ => {   //Should never get here, so nothing to do.
-    //         }
-    //     }
-
-    //     counter += 1;
-    // }
+        counter += 1;
+    }
     
-    // decoded.sort_by(|a, b| b.points.cmp(&a.points));
-    // Ok(decoded)
+    ret.sort_by(|a, b| b.points.cmp(&a.points));
+
     Ok(ret)
-
-
-
-
 
 } //end of load_complete_table
 
@@ -542,7 +490,7 @@ mod tests {
     // #[ignore]
     #[test]
     fn t002_load_1() {
-        let res = Drivers::load_driver("./test/points1.txt", "./test/points2.txt");
+        let res = load_complete_table("./test/points1.txt", "./test/points2.txt");
         assert_eq!(res.is_err(), true);
     }
 
@@ -555,7 +503,7 @@ mod tests {
         let destination2 = "./test/dpr.txt";
         copy(source1, destination1).expect("Failed to copy");
         copy(source2, destination2).expect("Failed to copy");
-        let res = Drivers::load_driver(source1, source2);
+        let res = load_complete_table(source1, source2);
         remove_file(destination1).expect("Cleanup test failed");
         remove_file(destination2).expect("Cleanup test failed");
 
@@ -583,7 +531,7 @@ mod tests {
         let destination2 = "./test/dpr.txt";
         copy(source1, destination1).expect("Failed to copy");
         copy(source2, destination2).expect("Failed to copy");
-        let res = Drivers::load_driver(source1, source2);
+        let res = load_complete_table(source1, source2);
         remove_file(destination1).expect("Cleanup test failed");
         remove_file(destination2).expect("Cleanup test failed");
 

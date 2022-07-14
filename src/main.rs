@@ -129,6 +129,11 @@ fn main() {
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& files &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     let res_driver = load_complete_table(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
+    if res_driver.is_err() {
+        let message = format!("{}", res_driver.unwrap_err());
+        feedback(Feedback::Error, message);
+        exit(17);
+    }
 
 
 
