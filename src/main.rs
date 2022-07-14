@@ -35,74 +35,119 @@ use crate::library::solutions::Solutions;
 use crate::library::teams::*;
 
 
+const VERSION: &str            = env!("CARGO_PKG_VERSION");
 
 pub const DRIVER_POINTS_FILENAME: &str = "./driver-points.txt";
 pub const DRIVER_PRICE_FILENAME: &str = "./driver-price.txt";
 pub const TEAM_POINTS_FILENAME: &str = "./team-points.txt";
 pub const TEAM_PRICE_FILENAME: &str = "./team-price.txt";
 
-const VERSION: &str            = env!("CARGO_PKG_VERSION");
-const TURBO_DRIVER_CUTOFF: i32 = 200;
+const TURBO_DRIVER_CUTOFF: usize = 200;
+const MAX_NUMBER_OF_ARGUMENTS: usize = 3;
+const MAX_NUMBER_OF_RACES: i32 = 30;
 
 
 
 fn main() {
     let now = SystemTime::now();
+    let mut budget: i32 = 0;
+    let mut form: i32= 0;
+    
+    
+    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& arguments &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    
     let arguments: Vec<String> = env::args().collect();
-    // let mut command = None;
+    let mut command = String::new();
+    let mut sub1 = None;
 
+
+    // There are no arguments
+    if arguments.len() < 2 {
+        let message = format!("Not enough arguments, please supply a tenfold budget. \n \
+                                        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
+        feedback(Feedback::Error, message);
+        exit(17);
+    }
+
+    // There are too many arguments
+    if arguments.len() > MAX_NUMBER_OF_ARGUMENTS {
+        let message = format!("There are too many arguments, try something like, \n \
+                                        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
+        feedback(Feedback::Error, message);
+        exit(17);
+    }
+
+
+    // It seems I need to do this,otherwise temporary variables get dropped
     match arguments.len() {
         2 => {
-            let command = Some(arguments[1].to_lowercase().trim().to_owned());
-            match command.unwrap().as_str() {
-                "v"|"V"|"-v"|"-V"|"version"|"Version"|"VERSION"|"-version"|"-Version"|"-VERSION" => {
-                    let message = format!("My Fantasy F1 version:  {}", VERSION);
-                    feedback(Feedback::Info, message);
-                    exit(17);
-
-                }
-
-                    // Not a valid first argument 
-                _   => {
-                    let message = format!("Not enough arguments, please supply a tenfold turbo price cut-off first \
-                                            and then followed by a tenfold budget. \n \
-                                            (eg.) /home/dave/f1_fantasy/fantasy_f1 200 990");
-                    feedback(Feedback::Error, message);
-                    exit(17);
-                } //end of _ 
-            }
+            command = arguments[1].to_lowercase().trim().to_owned();
+        },
+        3 => {
+            command = arguments[1].to_lowercase().trim().to_owned();
+            sub1 = Some(arguments[2].trim().to_owned());
         },
 
         _ => { () }
     }
 
+    // The "_" match goes through both arguments
+    match command.as_str() {
+        "-version"|"-v"|"v"|"version"   => {  
+
+        } //end of version
+
+
+        _ => { 
+            let possible_first = command.parse::<i32>();
+            if possible_first.is_err() {
+                let message = format!("Budget value is not a valid integer");
+                feedback(Feedback::Error, message);
+                exit(17);
+            }
+            budget = possible_first.unwrap();
+            println!("The budget is {}",budget);
+            
+            // If there is a second argument
+            if sub1.is_some(){
+                let possible_second = sub1.unwrap().parse::<i32>();
+                
+                if possible_second.is_err() {
+                    let message = format!("Form value is not a valid integer");
+                    feedback(Feedback::Error, message);
+                    exit(17);
+                }
+                form = possible_second.unwrap();
+                println!("The form is {}",form);
+            }
+        } // end of _
+        
+    } // end of match
+    
     println!();
     
-    
-    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& arguments &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    // Get budget
-    let res_budget = arguments[2].parse::<i32>(); 
-    if res_budget.is_err() {
-        let message = format!("Budget is not a valid number.");
-        feedback(Feedback::Error, message);
-        exit(17);
-    }
-    let budget = res_budget.unwrap();
-    println!("The budget is {}",budget);
-    
-    // // Get Turbo price cut-off (tpc)
-    // let res_tpc = arguments[1].parse::<i32>(); 
-    // if res_tpc.is_err() {
-    //     let message = format!("Turbo price cut-off is not a valid number.");
-    //     feedback(Feedback::Error, message);
-    //     exit(17);
-    // }
-    // let turbo_price_cutoff = res_tpc.unwrap();
-    // println!("The turbo price cutoff is {}",turbo_price_cutoff);
-    // println!();
-    
-    
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& files &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    
+    let res_driver = load_complete_table(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+    
+
+    
+    
     let res_driver = Drivers::load_driver(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
     if res_driver.is_err() {
         let message = format!("{}", res_driver.unwrap_err());
@@ -168,7 +213,7 @@ fn main() {
             for drv in combinations.to_vec() {
                 let td_solution: Vec<Solutions> = calculate_solutions(drv, car.clone(), 
                                                 // budget.clone(), turbo_price_cutoff.clone());
-                                                budget.clone(), TURBO_DRIVER_CUTOFF);
+                                                budget.clone(), TURBO_DRIVER_CUTOFF as i32);
     
                 for solution in td_solution {
     
