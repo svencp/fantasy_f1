@@ -44,7 +44,7 @@ pub const TEAM_PRICE_FILENAME: &str = "./team-price.txt";
 
 const TURBO_DRIVER_CUTOFF: usize = 200;
 const MAX_NUMBER_OF_ARGUMENTS: usize = 3;
-const MAX_NUMBER_OF_RACES: i32 = 30;
+const MAX_NUMBER_OF_RACES: usize = 30;
 
 
 
