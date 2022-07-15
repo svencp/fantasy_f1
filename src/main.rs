@@ -131,7 +131,7 @@ fn main() {
     
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& files &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
-    let res_driver = load_complete_table(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
+    let res_driver = load_complete_driver_table(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
     if res_driver.is_err() {
         let message = format!("{}", res_driver.unwrap_err());
         feedback(Feedback::Error, message);
@@ -148,7 +148,7 @@ fn main() {
         exit(17);
     }
 
-    let res_team = Teams::load_team(TEAM_POINTS_FILENAME, TEAM_PRICE_FILENAME);
+    let res_team = load_complete_team_table(TEAM_POINTS_FILENAME, TEAM_PRICE_FILENAME);
     if res_team.is_err() {
         let message = format!("{}", res_team.unwrap_err());
         feedback(Feedback::Error, message);
@@ -160,7 +160,7 @@ fn main() {
     print_driver_table(&driver);
 
     // The teams and print
-    let teams = res_team.unwrap();
+    let mut teams = res_team.unwrap();
     print_team_table(&teams);
 
     
@@ -170,8 +170,15 @@ fn main() {
 
     // Change to only count significant races
     if form > 0 && form < number_of_races {
+
+        // for drivers
         for drv in &mut driver {
             drv.significant_races(form);
+        }
+
+        // for teams
+        for team in &mut teams {
+            team.significant_races(form);
         }
     }
 

@@ -22,7 +22,7 @@ use std::cmp;
 
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct CompleteStandings {
+pub struct DriverStandings {
     pub points: i32,
     pub name: String,
     pub team: String,
@@ -31,10 +31,10 @@ pub struct CompleteStandings {
 }
 
 
-impl CompleteStandings {
+impl DriverStandings {
     // make an empty Drivers struct
-    pub fn new() -> CompleteStandings {
-        CompleteStandings {
+    pub fn new() -> DriverStandings {
+        DriverStandings {
             name: "".to_string(),
             team: "".to_string(),
             price: 0,
@@ -69,9 +69,9 @@ impl CompleteStandings {
 
 
 // Load the complete driver standingd and the corresponding prices of each driver
-pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Vec<CompleteStandings>, String> {
-    let mut decoded: Vec<CompleteStandings> = Vec::new();
-    let mut ret: Vec<CompleteStandings> = Vec::new();
+pub fn load_complete_driver_table(d_points_file: &str, d_price_file: &str) -> Result<Vec<DriverStandings>, String> {
+    let mut decoded: Vec<DriverStandings> = Vec::new();
+    let mut ret: Vec<DriverStandings> = Vec::new();
     let mut last_int: i32 = 0;
     let mut first_float: f32 = 0.0;
     let mut line1: String = "".to_string();
@@ -82,10 +82,10 @@ pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Ve
     
     // Lets open the standings file
     let file_dst = match OpenOptions::new()
-    .read(true)
-    .write(false)
-    .create(false)
-    .open(d_points_file)
+                            .read(true)
+                            .write(false)
+                            .create(false)
+                            .open(d_points_file)
     {
         Ok(content) => content,
         Err(_) => {
@@ -117,7 +117,7 @@ pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Ve
                 let cc = in_string.clone();
                 let points: Vec<_> = cc.split_whitespace().collect();
                 
-                let mut s_driver = CompleteStandings::new();
+                let mut s_driver = DriverStandings::new();
                 let mut num_zeros: i32 = 0;
                 
                 
@@ -163,8 +163,7 @@ pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Ve
     
     // Shortening the race vector to only have results
     for driver in decoded {
-        let mut revised = CompleteStandings::new();
-        let mut r_vec: Vec<i32> = Vec::new();
+        let mut revised = DriverStandings::new();
         let mut index = 0;
         let mut r_vec: Vec<i32> = Vec::new();
         
@@ -273,7 +272,7 @@ pub fn load_complete_table(d_points_file: &str, d_price_file: &str) -> Result<Ve
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Functions &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 // Function to show driver table
-pub fn print_driver_table(table: &Vec<CompleteStandings>){
+pub fn print_driver_table(table: &Vec<DriverStandings>){
     const WDRIVER: usize = 12;
     const WPOINTS: usize =  7;
     const WPRICE: usize  =  7;
@@ -319,7 +318,7 @@ mod tests {
     // #[ignore]
     #[test]
     fn t001_new() {
-        let mut dr = CompleteStandings::new();
+        let mut dr = DriverStandings::new();
         dr.name = "Verpy".to_string();
 
         assert_eq!(dr.name, "Verpy".to_string());
@@ -328,7 +327,7 @@ mod tests {
     // #[ignore]
     #[test]
     fn t002_load_1() {
-        let res = load_complete_table("./test/points1.txt", "./test/points2.txt");
+        let res = load_complete_driver_table("./test/points1.txt", "./test/points2.txt");
         assert_eq!(res.is_err(), true);
     }
 
@@ -341,7 +340,7 @@ mod tests {
         let destination2 = "./test/dpr.txt";
         copy(source1, destination1).expect("Failed to copy");
         copy(source2, destination2).expect("Failed to copy");
-        let res = load_complete_table(source1, source2);
+        let res = load_complete_driver_table(source1, source2);
         remove_file(destination1).expect("Cleanup test failed");
         remove_file(destination2).expect("Cleanup test failed");
 
@@ -369,7 +368,7 @@ mod tests {
         let destination2 = "./test/dpr.txt";
         copy(source1, destination1).expect("Failed to copy");
         copy(source2, destination2).expect("Failed to copy");
-        let res = load_complete_table(source1, source2);
+        let res = load_complete_driver_table(source1, source2);
         remove_file(destination1).expect("Cleanup test failed");
         remove_file(destination2).expect("Cleanup test failed");
 
@@ -398,7 +397,7 @@ mod tests {
         let destination2 = "./test/dpr.txt";
         copy(source1, destination1).expect("Failed to copy");
         copy(source2, destination2).expect("Failed to copy");
-        let res = load_complete_table(source1, source2);
+        let res = load_complete_driver_table(source1, source2);
         remove_file(destination1).expect("Cleanup test failed");
         remove_file(destination2).expect("Cleanup test failed");
 

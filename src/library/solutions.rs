@@ -46,7 +46,7 @@ impl Solutions {
 
 
 // calcualet the totals and if it is a solution
-pub fn calculate_solutions(vec: Vec<CompleteStandings>, car: Teams, budget: i32, tdc: i32) -> Vec<Solutions> {
+pub fn calculate_solutions(vec: Vec<DriverStandings>, car: TeamStandings, budget: i32, tdc: i32) -> Vec<Solutions> {
 
     let mut ret: Vec<Solutions> = Vec::new();
     let mut total_points = 0;
