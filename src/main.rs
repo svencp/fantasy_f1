@@ -50,10 +50,11 @@ const MAX_NUMBER_OF_RACES: usize = 30;
 
 fn main() {
     let now = SystemTime::now();
-    let mut budget: i32 = 0;
+    let budget;
     let mut form: i32= 0;
     
-    
+    println!("The turbo price cutoff is {}",TURBO_DRIVER_CUTOFF);
+
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& arguments &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     let arguments: Vec<String> = env::args().collect();
@@ -94,7 +95,9 @@ fn main() {
     // The "_" match goes through both arguments
     match command.as_str() {
         "-version"|"-v"|"v"|"version"   => {  
-
+            let message = format!("My Fantasy F1 version:  {}", VERSION);
+            feedback(Feedback::Info, message);
+            exit(17);
         } //end of version
 
 
@@ -135,31 +138,6 @@ fn main() {
         exit(17);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
-    
-
-    
-    
-    let res_driver = Drivers::load_driver(DRIVER_POINTS_FILENAME, DRIVER_PRICE_FILENAME);
-    if res_driver.is_err() {
-        let message = format!("{}", res_driver.unwrap_err());
-        feedback(Feedback::Error, message);
-        exit(17);
-    }
-
     let res_budget = arguments[1].parse::<i32>();
     if res_budget.is_err() {
         let message = format!(
@@ -178,12 +156,25 @@ fn main() {
     }
 
     // The Actual Vectors sorted by points and print the table
-    let driver = res_driver.unwrap();
+    let mut driver = res_driver.unwrap();
     print_driver_table(&driver);
 
     // The teams and print
     let teams = res_team.unwrap();
     print_team_table(&teams);
+
+    
+    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& form  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    
+    let number_of_races = driver.clone()[0].races.len() as i32;
+
+    // Change to only count significant races
+    if form > 0 && form < number_of_races {
+        for drv in &mut driver {
+            drv.significant_races(form);
+        }
+    }
+
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& combinatorics &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
@@ -193,11 +184,11 @@ fn main() {
     // r = the number of drivers allowed in fantasy
     let r = 5;
     let driver_combinations: Vec<_> = Combinations::new(driver.clone(), r).collect();
-    // The arc here might not be necessary
+    // The arc here might not be necessary, but it does have a speed implication (better)
     let arc_driver_combinations = Arc::new(driver_combinations.clone());
     
-    
-    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& threading &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+    // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& threading &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     let (tx, rx): (Sender<Vec<Solutions>>, Receiver<Vec<Solutions>>) = mpsc::channel();
     let mut children = Vec::new();
 
@@ -217,7 +208,6 @@ fn main() {
 
             for drv in combinations.to_vec() {
                 let td_solution: Vec<Solutions> = calculate_solutions(drv, car.clone(), 
-                                                // budget.clone(), turbo_price_cutoff.clone());
                                                 budget.clone(), TURBO_DRIVER_CUTOFF as i32);
     
                 for solution in td_solution {
@@ -325,6 +315,8 @@ fn main() {
     println!();
     let f_price: f64 = temp_sol.total_price.to_string().parse::<f64>().unwrap() / 10.0;
     println!("The budget was found to be ${} with the highest points of {}", f_price, temp_sol.total_points);
+    println!("The form was {}.", form);
+
     show_response(now);
 
 
