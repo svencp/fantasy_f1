@@ -298,7 +298,7 @@ fn main() {
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Show Results &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
     println!("");
-    println!("{}{}                                                    {}        {}   {}{}",
+    println!("{}{}                                                       {}        {}   {}{}",
         color::Fg(MY_YELLOW), "Drivers and car","TD","$","Points", style::Reset);
 
     for i in 0..20 {
@@ -313,7 +313,7 @@ fn main() {
                                                         vec_solutions[i].drivers[3],
                                                         vec_solutions[i].drivers[4],
                                                         vec_solutions[i].car);
-        let just = justify(line, 54, Justify::Left);
+        let just = justify(line, 57, Justify::Left);
         let arr = justify(" --> ".to_string(), 6, Justify::Left);
         let turbo = justify(vec_solutions[i].turbo_driver.to_string(), 12, Justify::Right);
         let tpr = justify(vec_solutions[i].total_price.to_string(), 7, Justify::Right);
