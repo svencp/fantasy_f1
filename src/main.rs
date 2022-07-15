@@ -14,6 +14,8 @@ This I feel will make the LP problem more accurite.
     
     2022-07-08      Adding version to arguments
 
+    2022-07-15      Adding form 
+
     
 */
 
@@ -53,32 +55,31 @@ fn main() {
     let budget;
     let mut form: i32= 0;
     
-    println!("The turbo price cutoff is {}",TURBO_DRIVER_CUTOFF);
-
+    
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& arguments &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     let arguments: Vec<String> = env::args().collect();
     let mut command = String::new();
     let mut sub1 = None;
-
-
+    
+    
     // There are no arguments
     if arguments.len() < 2 {
         let message = format!("Not enough arguments, please supply a tenfold budget. \n \
-                                        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
+        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
         feedback(Feedback::Error, message);
         exit(17);
     }
-
+    
     // There are too many arguments
     if arguments.len() > MAX_NUMBER_OF_ARGUMENTS {
         let message = format!("There are too many arguments, try something like, \n \
-                                        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
+        (eg.) /home/dave/f1_fantasy/fantasy_f1 990");
         feedback(Feedback::Error, message);
         exit(17);
     }
-
-
+    
+    
     // It seems I need to do this,otherwise temporary variables get dropped
     match arguments.len() {
         2 => {
@@ -88,10 +89,10 @@ fn main() {
             command = arguments[1].to_lowercase().trim().to_owned();
             sub1 = Some(arguments[2].trim().to_owned());
         },
-
+        
         _ => { () }
     }
-
+    
     // The "_" match goes through both arguments
     match command.as_str() {
         "-version"|"-v"|"v"|"version"   => {  
@@ -99,8 +100,8 @@ fn main() {
             feedback(Feedback::Info, message);
             exit(17);
         } //end of version
-
-
+        
+        
         _ => { 
             let possible_first = command.parse::<i32>();
             if possible_first.is_err() {
@@ -121,13 +122,13 @@ fn main() {
                     exit(17);
                 }
                 form = possible_second.unwrap();
-                println!("The form is {}",form);
             }
         } // end of _
         
     } // end of match
     
-    println!();
+    println!("The turbo price cutoff is {}",TURBO_DRIVER_CUTOFF);
+    println!("The form was {}.", form);
     
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& files &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
@@ -157,30 +158,33 @@ fn main() {
 
     // The Actual Vectors sorted by points and print the table
     let mut driver = res_driver.unwrap();
-    print_driver_table(&driver);
-
+    
     // The teams and print
     let mut teams = res_team.unwrap();
-    print_team_table(&teams);
-
+    
     
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& form  &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     
     let number_of_races = driver.clone()[0].races.len() as i32;
-
+    
     // Change to only count significant races
     if form > 0 && form < number_of_races {
-
+        
         // for drivers
         for drv in &mut driver {
             drv.significant_races(form);
         }
-
+        
         // for teams
         for team in &mut teams {
             team.significant_races(form);
         }
     }
+    
+    
+    // print tables after form
+    print_driver_table(&driver);
+    print_team_table(&teams);
 
 
     // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& combinatorics &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -204,7 +208,6 @@ fn main() {
 
         // The sender endpoint can be copied
         let thread_tx = tx.clone();
-        // let car_name = car.clone().team;
         let combinations = arc_driver_combinations.clone();
 
 
@@ -328,3 +331,5 @@ fn main() {
 
 
 } // End of Main
+
+

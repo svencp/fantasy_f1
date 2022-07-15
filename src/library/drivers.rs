@@ -40,10 +40,10 @@ impl DriverStandings {
             price: 0,
             points: 0,
             races: Vec::with_capacity(MAX_NUMBER_OF_RACES),
-            // races: vec![0; MAX_NUMBER_OF_RACES],
         }
     } //end of new
     
+    // shorten to only have significant races
     pub fn significant_races(&mut self, form: i32)   {
         let len = self.races.len() as i32;
         let number_of_pops = len - form;
@@ -123,7 +123,6 @@ pub fn load_complete_driver_table(d_points_file: &str, d_price_file: &str) -> Re
                 
                 for s in points {
                     match s.parse::<i32>() {
-                        // Ok(ii) => last_int = ii,
                         Ok(ii) => { 
                             if ii == 0 {
                                 num_zeros += 1;
@@ -139,7 +138,6 @@ pub fn load_complete_driver_table(d_points_file: &str, d_price_file: &str) -> Re
                 
                 
                 // Create and assign
-                // let big = make_10x_int(last_float);
                 s_driver.points = last_int;
                 s_driver.name = line1.clone();
                 s_driver.team = line2.clone();
